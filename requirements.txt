@@ -3,6 +3,21 @@
 # process, which may cause wedges in the gate later.
 
 pbr<2.0,>=1.3
+
+-e git+https://github.com/openstack/oslo.vmware.git#egg=oslo.vmware
+-e git+https://github.com/openstack/oslo.concurrency.git#egg=oslo.concurrency
+-e git+https://github.com/openstack/oslo.config.git#egg=oslo.config
+-e git+https://github.com/openstack/oslo.context.git#egg=oslo.context
+-e git+https://github.com/openstack/oslo.db.git#egg=oslo.db
+-e git+https://github.com/openstack/oslo.i18n.git#egg=oslo.i18n
+-e git+https://github.com/openstack/oslo.log.git#egg=oslo.log
+-e git+https://github.com/openstack/oslo.messaging.git#egg=oslo.messaging
+-e git+https://github.com/openstack/oslo.middleware.git#egg=oslo.middleware
+-e git+https://github.com/openstack/oslo.policy.git#egg=oslo.policy
+-e git+https://github.com/openstack/oslo.serialization.git#egg=oslo.serialization
+-e git+https://github.com/openstack/oslo.service.git#egg=oslo.service
+-e git+https://github.com/openstack/oslo.utils.git#egg=oslo.utils
+
 #
 # The greenlet package must be compiled with gcc and needs
 # the Python.h headers. Make sure you install the python-dev
@@ -24,7 +39,7 @@ pycrypto>=2.6
 iso8601>=0.1.9
 
 stevedore>=1.5.0 # Apache-2.0
-taskflow>=0.11.0
+taskflow>=1.16.0
 keystonemiddleware>=2.0.0
 WSME>=0.7
 # For openstack/common/lockutils
@@ -34,7 +49,6 @@ posix-ipc
 python-swiftclient>=2.2.0
 
 # For VMware storage backed.
--e git+https://github.com/openstack/oslo.vmware.git#egg=oslo.vmware
 
 # For paste.util.template used in keystone.common.template
 Paste
@@ -45,18 +59,6 @@ pyOpenSSL>=0.14
 # Required by openstack.common libraries
 six>=1.9.0
 
--e git+https://github.com/openstack/oslo.concurrency.git#egg=oslo.concurrency
--e git+https://github.com/openstack/oslo.config.git#egg=oslo.config
--e git+https://github.com/openstack/oslo.context.git#egg=oslo.context
--e git+https://github.com/openstack/oslo.db.git#egg=oslo.db
--e git+https://github.com/openstack/oslo.i18n.git#egg=oslo.i18n
--e git+https://github.com/openstack/oslo.log.git#egg=oslo.log
--e git+https://github.com/openstack/oslo.messaging.git#egg=oslo.messaging
--e git+https://github.com/openstack/oslo.middleware.git#egg=oslo.middleware
--e git+https://github.com/openstack/oslo.policy.git#egg=oslo.policy
--e git+https://github.com/openstack/oslo.serialization.git#egg=oslo.serialization
--e git+https://github.com/openstack/oslo.service.git#egg=oslo.service
--e git+https://github.com/openstack/oslo.utils.git#egg=oslo.utils
 
 retrying!=1.3.0,>=1.2.3 # Apache-2.0
 osprofiler>=0.3.0 # Apache-2.0
