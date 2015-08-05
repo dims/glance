@@ -59,13 +59,13 @@ INDEX = 0
 def log_call(func):
     @functools.wraps(func)
     def wrapped(*args, **kwargs):
-        LOG.info(_LI('Calling %(funcname)s: args=%(args)s, '
+        LOG.trace(_LI('Calling %(funcname)s: args=%(args)s, '
                      'kwargs=%(kwargs)s') %
                  {"funcname": func.__name__,
                   "args": args,
                   "kwargs": kwargs})
         output = func(*args, **kwargs)
-        LOG.info(_LI('Returning %(funcname)s: %(output)s') %
+        LOG.trace(_LI('Returning %(funcname)s: %(output)s') %
                  {"funcname": func.__name__,
                   "output": output})
         return output
