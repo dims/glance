@@ -158,6 +158,7 @@ class TestMetadefsControllers(base.IsolatedUnitTest):
             self.db, self.policy, self.notifier)
         self.tag_controller = tags.TagsController(
             self.db, self.policy, self.notifier)
+        self.deserializer = objects.RequestDeserializer()
 
     def _create_namespaces(self):
         req = unit_test_utils.get_fake_request()
@@ -255,7 +256,7 @@ class TestMetadefsControllers(base.IsolatedUnitTest):
         actual = set([namespace.namespace for
                       namespace in output['namespaces']])
         expected = set([NAMESPACE1, NAMESPACE3, NAMESPACE5, NAMESPACE6])
-        self.assertEqual(actual, expected)
+        self.assertEqual(expected, actual)
 
     def test_namespace_index_admin(self):
         request = unit_test_utils.get_fake_request(is_admin=True)
@@ -605,6 +606,17 @@ class TestMetadefsControllers(base.IsolatedUnitTest):
         namespace = self.namespace_controller.show(request, NAMESPACE4)
         self.assertEqual(NAMESPACE4, namespace.namespace)
 
+    def test_namespace_create_duplicate(self):
+        request = unit_test_utils.get_fake_request()
+
+        namespace = namespaces.Namespace()
+        namespace.namespace = 'new-namespace'
+        new_ns = self.namespace_controller.create(request, namespace)
+        self.assertEqual('new-namespace', new_ns.namespace)
+        self.assertRaises(webob.exc.HTTPConflict,
+                          self.namespace_controller.create,
+                          request, namespace)
+
     def test_namespace_create_different_owner(self):
         request = unit_test_utils.get_fake_request()
 
@@ -835,7 +847,7 @@ class TestMetadefsControllers(base.IsolatedUnitTest):
         output = self.property_controller.show(
             request, NAMESPACE6, ''.join([PREFIX1, PROPERTY4]),
             filters={'resource_type': RESOURCE_TYPE4})
-        self.assertEqual(output.name, PROPERTY4)
+        self.assertEqual(PROPERTY4, output.name)
 
     def test_property_show_prefix_mismatch(self):
         request = unit_test_utils.get_fake_request()
@@ -1036,6 +1048,20 @@ class TestMetadefsControllers(base.IsolatedUnitTest):
                           property)
         self.assertNotificationsLog([])
 
+    def test_property_create_duplicate(self):
+        request = unit_test_utils.get_fake_request()
+
+        property = properties.PropertyType()
+        property.name = 'new-property'
+        property.type = 'string'
+        property.title = 'title'
+        new_property = self.property_controller.create(request, NAMESPACE1,
+                                                       property)
+        self.assertEqual('new-property', new_property.name)
+        self.assertRaises(webob.exc.HTTPConflict,
+                          self.property_controller.create, request,
+                          NAMESPACE1, property)
+
     def test_property_update(self):
         request = unit_test_utils.get_fake_request(tenant=TENANT3)
 
@@ -1139,6 +1165,13 @@ class TestMetadefsControllers(base.IsolatedUnitTest):
         actual = set([object.name for object in output['objects']])
         expected = set([OBJECT1, OBJECT2])
         self.assertEqual(expected, actual)
+
+    def test_object_index_zero_limit(self):
+        request = unit_test_utils.get_fake_request('/metadefs/namespaces/'
+                                                   'Namespace3/'
+                                                   'objects?limit=0')
+        self.assertRaises(webob.exc.HTTPBadRequest, self.deserializer.index,
+                          request)
 
     def test_object_index_empty(self):
         request = unit_test_utils.get_fake_request()
@@ -1253,6 +1286,19 @@ class TestMetadefsControllers(base.IsolatedUnitTest):
         self.assertEqual(OBJECT2, object.name)
         self.assertEqual([], object.required)
         self.assertEqual({}, object.properties)
+
+    def test_object_create_duplicate(self):
+        request = unit_test_utils.get_fake_request()
+
+        object = objects.MetadefObject()
+        object.name = 'New-Object'
+        object.required = []
+        object.properties = {}
+        new_obj = self.object_controller.create(request, object, NAMESPACE3)
+        self.assertEqual('New-Object', new_obj.name)
+        self.assertRaises(webob.exc.HTTPConflict,
+                          self.object_controller.create, request, object,
+                          NAMESPACE3)
 
     def test_object_create_conflict(self):
         request = unit_test_utils.get_fake_request()

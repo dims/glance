@@ -188,15 +188,24 @@ def image_member_delete(client, memb_id, session=None):
 
 
 @_get_client
-def image_member_find(client, image_id=None, member=None, status=None):
-    """Find all members that meet the given criteria
+def image_member_find(client, image_id=None, member=None, status=None,
+                      include_deleted=False):
+    """Find all members that meet the given criteria.
+
+    Note, currently include_deleted should be true only when create a new
+    image membership, as there may be a deleted image membership between
+    the same image and tenant, the membership will be reused in this case.
+    It should be false in other cases.
 
     :param image_id: identifier of image entity
     :param member: tenant to which membership has been granted
+    :include_deleted: A boolean indicating whether the result should include
+     the deleted record of image member
     """
     return client.image_member_find(image_id=image_id,
                                     member=member,
-                                    status=status)
+                                    status=status,
+                                    include_deleted=include_deleted)
 
 
 @_get_client
@@ -595,8 +604,10 @@ def artifact_get(client, artifact_id,
 
 @_get_client
 def artifact_get_all(client, marker=None, limit=None, sort_key=None,
-                     sort_dir=None, filters={},
+                     sort_dir=None, filters=None,
                      show_level=artifacts.Showlevel.NONE, session=None):
+    if filters is None:
+        filters = {}
     return client.artifact_create(marker, limit, sort_key,
                                   sort_dir, filters, show_level)
 

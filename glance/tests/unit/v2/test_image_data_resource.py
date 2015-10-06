@@ -192,6 +192,23 @@ class TestImagesController(base.StoreClearingUnitTest):
         self.assertRaises(webob.exc.HTTPBadRequest, self.controller.upload,
                           request, unit_test_utils.UUID1, 'YYYY', 4)
 
+    def test_upload_with_expired_token(self):
+        def side_effect(image, from_state=None):
+            if from_state == 'saving':
+                raise exception.NotAuthenticated()
+
+        mocked_save = mock.Mock(side_effect=side_effect)
+        mocked_delete = mock.Mock()
+        request = unit_test_utils.get_fake_request()
+        image = FakeImage('abcd')
+        image.delete = mocked_delete
+        self.image_repo.result = image
+        self.image_repo.save = mocked_save
+        self.assertRaises(webob.exc.HTTPUnauthorized, self.controller.upload,
+                          request, unit_test_utils.UUID1, 'YYYY', 4)
+        self.assertEqual(3, mocked_save.call_count)
+        mocked_delete.assert_called_once_with()
+
     def test_upload_non_existent_image_during_save_initiates_deletion(self):
         def fake_save_not_found(self):
             raise exception.ImageNotFound()
@@ -329,7 +346,7 @@ class TestImagesController(base.StoreClearingUnitTest):
         prepare_updated_at = output_log[0]['payload']['updated_at']
         del output_log[0]['payload']['updated_at']
         self.assertTrue(prepare_updated_at <= output['meta']['updated_at'])
-        self.assertEqual(output_log[0], prepare_log)
+        self.assertEqual(prepare_log, output_log[0])
 
     def _test_upload_download_upload_notification(self):
         request = unit_test_utils.get_fake_request()
@@ -343,7 +360,7 @@ class TestImagesController(base.StoreClearingUnitTest):
             'payload': upload_payload,
         }
         self.assertEqual(3, len(output_log))
-        self.assertEqual(output_log[1], upload_log)
+        self.assertEqual(upload_log, output_log[1])
 
     def _test_upload_download_activate_notification(self):
         request = unit_test_utils.get_fake_request()
@@ -357,7 +374,7 @@ class TestImagesController(base.StoreClearingUnitTest):
             'payload': activate_payload,
         }
         self.assertEqual(3, len(output_log))
-        self.assertEqual(output_log[2], activate_log)
+        self.assertEqual(activate_log, output_log[2])
 
     def test_restore_image_when_upload_failed(self):
         request = unit_test_utils.get_fake_request()

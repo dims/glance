@@ -39,7 +39,7 @@ virtual CPU topology property in the list and know that it must be an integer.
 When the user adds the property its key and value will be stored in the
 service that owns that resource (for example, Nova for flavors and in Glance
 for images). The catalog also includes any additional prefix required when
-the property is applied to different types of resources, such as "hw_" for
+the property is applied to different types of resources, such as "hw\_" for
 images and "hw:" for flavors.  So, on an image, the user would know to set the
 property as "hw_cpu_cores=1".
 
@@ -162,7 +162,7 @@ via metadata. The keys have different prefixes on images than on flavors.
 On flavors keys are prefixed with ``hw:``, but on images the keys are prefixed
 with ``hw_``.
 
-For more: https://github.com/openstack/nova-specs/blob/master/specs/juno/virt-driver-vcpu-topology.rst
+For more: https://github.com/openstack/nova-specs/blob/master/specs/juno/implemented/virt-driver-vcpu-topology.rst
 
 Another example is the AggregateInstanceExtraSpecsFilter and scoped properties
 (e.g. properties with something:something=value). For scoped / namespaced

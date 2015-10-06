@@ -58,6 +58,7 @@ _LW = i18n._LW
 SUPPORTED_PARAMS = glance.api.v1.SUPPORTED_PARAMS
 SUPPORTED_FILTERS = glance.api.v1.SUPPORTED_FILTERS
 ACTIVE_IMMUTABLE = glance.api.v1.ACTIVE_IMMUTABLE
+IMMUTABLE = glance.api.v1.IMMUTABLE
 
 CONF = cfg.CONF
 CONF.import_opt('disk_formats', 'glance.common.config', group='image_format')
@@ -663,10 +664,11 @@ class Controller(controller.BaseController):
         :param image_id: Opaque image identifier
         :param location_data: Location of where Glance stored this image
         """
-        image_meta = {}
-        image_meta['location'] = location_data['url']
-        image_meta['status'] = 'active'
-        image_meta['location_data'] = [location_data]
+        image_meta = {
+            'location': location_data['url'],
+            'status': 'active',
+            'location_data': [location_data]
+        }
 
         try:
             s = from_state
@@ -932,12 +934,20 @@ class Controller(controller.BaseController):
             # Once an image is 'active' only an admin can
             # modify certain core metadata keys
             for key in ACTIVE_IMMUTABLE:
-                if (orig_status == 'active' and image_meta.get(key) is not None
+                if (orig_status == 'active' and key in image_meta
                         and image_meta.get(key) != orig_image_meta.get(key)):
                     msg = _("Forbidden to modify '%s' of active image.") % key
                     raise HTTPForbidden(explanation=msg,
                                         request=req,
                                         content_type="text/plain")
+
+        for key in IMMUTABLE:
+            if (key in image_meta and
+                    image_meta.get(key) != orig_image_meta.get(key)):
+                msg = _("Forbidden to modify '%s' of image.") % key
+                raise HTTPForbidden(explanation=msg,
+                                    request=req,
+                                    content_type="text/plain")
 
         # The default behaviour for a PUT /images/<IMAGE_ID> is to
         # override any properties that were previously set. This, however,

@@ -52,6 +52,7 @@ Glance Background Concepts
 
    architecture
    database_architecture
+   domain_model
    identifiers
    statuses
    formats
@@ -71,6 +72,7 @@ Installing/Configuring Glance
    image-location-strategy-modules
    artifact-types
    flows
+   property-protections
 
 Operating Glance
 ================
@@ -92,3 +94,12 @@ Using Glance
    glanceapi
    glanceclient
    glancemetadefcatalogapi
+
+Glance Manual Pages
+===================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   man/*

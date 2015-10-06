@@ -253,7 +253,8 @@ class ImageRepo(object):
 
     def add(self, image):
         image_values = self._format_image_to_db(image)
-        if image_values['size'] > CONF.image_size_cap:
+        if (image_values['size'] is not None
+           and image_values['size'] > CONF.image_size_cap):
             raise exception.ImageSizeLimitExceeded
         # the updated_at value is not set in the _format_image_to_db
         # function since it is specific to image create
@@ -266,7 +267,8 @@ class ImageRepo(object):
 
     def save(self, image, from_state=None):
         image_values = self._format_image_to_db(image)
-        if image_values['size'] > CONF.image_size_cap:
+        if (image_values['size'] is not None
+           and image_values['size'] > CONF.image_size_cap):
             raise exception.ImageSizeLimitExceeded
         try:
             new_values = self.db_api.image_update(self.context,
@@ -353,8 +355,22 @@ class ImageMemberRepo(object):
             raise exception.Duplicate(msg)
 
         image_member_values = self._format_image_member_to_db(image_member)
-        new_values = self.db_api.image_member_create(self.context,
-                                                     image_member_values)
+        # Note(shalq): find the image member including the member marked with
+        # deleted. We will use only one record to represent membership between
+        # the same image and member. The record of the deleted image member
+        # will be reused, if it exists, update its properties instead of
+        # creating a new one.
+        members = self.db_api.image_member_find(self.context,
+                                                image_id=self.image.image_id,
+                                                member=image_member.member_id,
+                                                include_deleted=True)
+        if members:
+            new_values = self.db_api.image_member_update(self.context,
+                                                         members[0]['id'],
+                                                         image_member_values)
+        else:
+            new_values = self.db_api.image_member_create(self.context,
+                                                         image_member_values)
         image_member.created_at = new_values['created_at']
         image_member.updated_at = new_values['updated_at']
         image_member.id = new_values['id']
