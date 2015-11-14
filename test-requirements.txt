@@ -30,4 +30,6 @@ pysendfile>=2.0.0
 qpid-python;python_version=='2.7'
 xattr>=0.4
 python-swiftclient>=2.2.0
-reno>=0.1.1  # Apache2
+
+# Documentation
+reno>=0.1.1 # Apache2
