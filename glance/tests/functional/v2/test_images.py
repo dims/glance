@@ -22,6 +22,7 @@ import requests
 import six
 # NOTE(jokke): simplified transition to py3, behaves like py2 xrange
 from six.moves import range
+from six.moves import urllib
 
 from glance.tests import functional
 from glance.tests import utils as test_utils
@@ -478,6 +479,26 @@ class TestImages(functional.FunctionalTest):
         path = self._url('/v2/images/%s/actions/deactivate' % image_id)
         response = requests.post(path, data={}, headers=self._headers())
         self.assertEqual(204, response.status_code)
+
+        # Change the image to public so TENANT2 can see it
+        path = self._url('/v2/images/%s' % image_id)
+        media_type = 'application/openstack-images-v2.0-json-patch'
+        headers = self._headers({'content-type': media_type})
+        data = jsonutils.dumps([{"replace": "/visibility", "value": "public"}])
+        response = requests.patch(path, headers=headers, data=data)
+        self.assertEqual(200, response.status_code, response.text)
+
+        # Tennant2 should get Forbidden when deactivating the public image
+        path = self._url('/v2/images/%s/actions/deactivate' % image_id)
+        response = requests.post(path, data={}, headers=self._headers(
+            {'X-Tenant-Id': TENANT2}))
+        self.assertEqual(403, response.status_code)
+
+        # Tennant2 should get Forbidden when reactivating the public image
+        path = self._url('/v2/images/%s/actions/reactivate' % image_id)
+        response = requests.post(path, data={}, headers=self._headers(
+            {'X-Tenant-Id': TENANT2}))
+        self.assertEqual(403, response.status_code)
 
         # Deactivating a deactivated image succeeds (no-op)
         path = self._url('/v2/images/%s/actions/deactivate' % image_id)
@@ -2451,6 +2472,26 @@ class TestImages(functional.FunctionalTest):
         self.assertEqual(7, len(body['images']))
         self.assertEqual('/v2/images', body['first'])
         self.assertNotIn('next', jsonutils.loads(response.text))
+
+        # Image list filters by created_at time
+        url_template = '/v2/images?created_at=lt:%s'
+        path = self._url(url_template % images[0]['created_at'])
+        response = requests.get(path, headers=self._headers())
+        self.assertEqual(200, response.status_code)
+        body = jsonutils.loads(response.text)
+        self.assertEqual(0, len(body['images']))
+        self.assertEqual(url_template % images[0]['created_at'],
+                         urllib.parse.unquote(body['first']))
+
+        # Image list filters by updated_at time
+        url_template = '/v2/images?updated_at=lt:%s'
+        path = self._url(url_template % images[2]['updated_at'])
+        response = requests.get(path, headers=self._headers())
+        self.assertEqual(200, response.status_code)
+        body = jsonutils.loads(response.text)
+        self.assertGreaterEqual(3, len(body['images']))
+        self.assertEqual(url_template % images[2]['updated_at'],
+                         urllib.parse.unquote(body['first']))
 
         # Begin pagination after the first image
         template_url = ('/v2/images?limit=2&sort_dir=asc&sort_key=name'
