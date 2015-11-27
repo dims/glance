@@ -2493,6 +2493,20 @@ class TestImages(functional.FunctionalTest):
         self.assertEqual(url_template % images[2]['updated_at'],
                          urllib.parse.unquote(body['first']))
 
+        # Image list filters by updated_at and created time with invalid value
+        url_template = '/v2/images?%s=lt:invalid_value'
+        for filter in ['updated_at', 'created_at']:
+            path = self._url(url_template % filter)
+            response = requests.get(path, headers=self._headers())
+            self.assertEqual(400, response.status_code)
+
+        # Image list filters by updated_at and created_at with invalid operator
+        url_template = '/v2/images?%s=invalid_operator:2015-11-19T12:24:02Z'
+        for filter in ['updated_at', 'created_at']:
+            path = self._url(url_template % filter)
+            response = requests.get(path, headers=self._headers())
+            self.assertEqual(400, response.status_code)
+
         # Begin pagination after the first image
         template_url = ('/v2/images?limit=2&sort_dir=asc&sort_key=name'
                         '&marker=%s&type=kernel&ping=pong')
