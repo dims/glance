@@ -133,7 +133,7 @@ def image_update(context, image_id, values, purge_props=False,
     """
     Set the given properties on an image and update it.
 
-    :raises ImageNotFound if image does not exist.
+    :raises: ImageNotFound if image does not exist.
     """
     return _image_update(context, values, image_id, purge_props,
                          from_state=from_state)
@@ -210,7 +210,7 @@ def _check_image_id(image_id):
     wrapping the different behaviors between MySql and DB2 when the image id
     length is longer than the defined length in database model.
     :param image_id: The id of the image we want to check
-    :return: Raise NoFound exception if given image id is invalid
+    :returns: Raise NoFound exception if given image id is invalid
     """
     if (image_id and
        len(image_id) > models.Image.id.property.columns[0].type.length):
@@ -293,6 +293,21 @@ def is_image_visible(context, image, status=None):
     return False
 
 
+def _get_default_column_value(column_type):
+    """Return the default value of the columns from DB table
+
+    In postgreDB case, if no right default values are being set, an
+    psycopg2.DataError will be thrown.
+    """
+    type_schema = {
+        'datetime': None,
+        'big_integer': 0,
+        'integer': 0,
+        'string': ''
+    }
+    return type_schema[column_type.__visit_name__]
+
+
 def _paginate_query(query, model, limit, sort_keys, marker=None,
                     sort_dir=None, sort_dirs=None):
     """Returns a query with sorting / pagination criteria added.
@@ -322,7 +337,7 @@ def _paginate_query(query, model, limit, sort_keys, marker=None,
     :param sort_dirs: per-column array of sort_dirs, corresponding to sort_keys
 
     :rtype: sqlalchemy.orm.query.Query
-    :return: The query with sorting/pagination added.
+    :returns: The query with sorting/pagination added.
     """
 
     if 'id' not in sort_keys:
@@ -372,17 +387,16 @@ def _paginate_query(query, model, limit, sort_keys, marker=None,
             crit_attrs = []
             for j in range(i):
                 model_attr = getattr(model, sort_keys[j])
-                default = None if isinstance(
-                    model_attr.property.columns[0].type,
-                    sqlalchemy.DateTime) else ''
+                default = _get_default_column_value(
+                    model_attr.property.columns[0].type)
                 attr = sa_sql.expression.case([(model_attr != None,
                                               model_attr), ],
                                               else_=default)
                 crit_attrs.append((attr == marker_values[j]))
 
             model_attr = getattr(model, sort_keys[i])
-            default = None if isinstance(model_attr.property.columns[0].type,
-                                         sqlalchemy.DateTime) else ''
+            default = _get_default_column_value(
+                model_attr.property.columns[0].type)
             attr = sa_sql.expression.case([(model_attr != None,
                                           model_attr), ],
                                           else_=default)
@@ -970,7 +984,7 @@ def _image_child_entry_delete_all(child_model_cls, image_id, delete_time=None,
     :param session: A SQLAlchemy session to use (if present)
 
     :rtype: int
-    :return: The number of child entries got soft-deleted.
+    :returns: The number of child entries got soft-deleted.
     """
     session = session or get_session()
 
@@ -1346,7 +1360,7 @@ def task_get_all(context, filters=None, marker=None, limit=None,
     :param admin_as_user: For backwards compatibility. If true, then return to
                       an admin the equivalent set of tasks which it would see
                       if it were a regular user
-    :return: tasks set
+    :returns: tasks set
     """
     filters = filters or {}
 
