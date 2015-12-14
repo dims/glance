@@ -27,7 +27,6 @@ from oslo_config import cfg
 from oslo_db import exception as db_exception
 from oslo_db.sqlalchemy import session
 from oslo_log import log as logging
-from oslo_utils import timeutils
 import osprofiler.sqlalchemy
 from retrying import retry
 import six
@@ -39,6 +38,7 @@ import sqlalchemy.sql as sa_sql
 
 from glance import artifacts as ga
 from glance.common import exception
+from glance.common import timeutils
 from glance.common import utils
 from glance.db.sqlalchemy import artifacts
 from glance.db.sqlalchemy.metadef_api import (resource_type
@@ -50,13 +50,11 @@ from glance.db.sqlalchemy.metadef_api import object as metadef_object_api
 from glance.db.sqlalchemy.metadef_api import property as metadef_property_api
 from glance.db.sqlalchemy.metadef_api import tag as metadef_tag_api
 from glance.db.sqlalchemy import models
-from glance import i18n
+from glance.i18n import _, _LW
 
 BASE = models.BASE
 sa_logger = None
 LOG = logging.getLogger(__name__)
-_ = i18n._
-_LW = i18n._LW
 
 
 STATUSES = ['active', 'saving', 'queued', 'killed', 'pending_delete',

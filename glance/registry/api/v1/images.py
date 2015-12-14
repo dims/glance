@@ -21,22 +21,18 @@ from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_utils import encodeutils
 from oslo_utils import strutils
-from oslo_utils import timeutils
 from oslo_utils import uuidutils
 from webob import exc
 
 from glance.common import exception
+from glance.common import timeutils
 from glance.common import utils
 from glance.common import wsgi
 import glance.db
-from glance import i18n
+from glance.i18n import _, _LE, _LI, _LW
 
 
 LOG = logging.getLogger(__name__)
-_ = i18n._
-_LE = i18n._LE
-_LI = i18n._LI
-_LW = i18n._LW
 
 CONF = cfg.CONF
 
