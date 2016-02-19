@@ -409,7 +409,7 @@ Optional. Default: ``glance.store.filesystem.Store, glance.store.http.Store``
 A comma separated list of enabled glance stores. Options are specified
 in the format of glance.store.OPTION.Store.  Some available options for this
 option are (``filesystem``, ``http``, ``rbd``, ``s3``, ``swift``, ``sheepdog``,
-``cinder``, ``gridfs``, ``vmware_datastore``)
+``cinder``, ``vmware_datastore``)
 
 Configuring Glance Image Size Limit
 -----------------------------------
@@ -627,7 +627,7 @@ will use multiple containers to store images, and this value will determine
 how many characters from an image UUID are checked when determining what
 container to place the image in. The maximum number of containers that will be
 created is approximately equal to 16^N. This setting is used only when
-swift_store_multi_tentant is disabled.
+swift_store_multi_tenant is disabled.
 
 Example: if this config option is set to 3 and
 swift_store_container = 'glance', then an image with UUID
@@ -1157,7 +1157,7 @@ Optional. Default: ``None``
 
 Can only be specified in configuration files.
 
-Location of ca certicates file to use for cinder client requests.
+Location of ca certificates file to use for cinder client requests.
 
 * ``cinder_http_retries=TIMES``
 
@@ -1369,7 +1369,7 @@ Required when image cache middleware is enabled.
 Default: ``/var/lib/glance/image-cache``
 
 This is the base directory the image cache can write files to.
-Make sure the directory is writeable by the user running the
+Make sure the directory is writable by the user running the
 ``glance-api`` server
 
  * ``image_cache_driver=DRIVER``
